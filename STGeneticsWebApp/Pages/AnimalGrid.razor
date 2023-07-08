@@ -8,7 +8,7 @@
             <DxStackLayoutItem Length="auto">
                 <Template>
                     <div class="stacklayout-header stacklayout-item">
-                        <h2>Animals</h2>
+                        <span class="d-block p-2 bg-primary text-white">ANIMALS</span>
                     </div>
                 </Template>
             </DxStackLayoutItem>
@@ -27,12 +27,15 @@
                     <div class="stacklayout-content stacklayout-item">
                         <DxGrid @ref="@Grid"
                                 Data="@AnimalList"
-                                KeyFieldName="Code"
+                                KeyFieldName="Id"
                                 ShowSearchBox="true"
                                 ShowGroupPanel="true"
                                 ShowFilterRow="true"
                                 ColumnResizeMode="GridColumnResizeMode.NextColumn"
                                 FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always"
+                                SelectedDataItems="SelectedDataItems"
+                                SelectedDataItemsChanged="OnSelectedDataItemsChanged"
+                                SelectAllCheckboxMode="GridSelectAllCheckboxMode.AllPages"
                                 EditMode="GridEditMode.PopupEditForm"
                                 PopupEditFormCssClass="PopupEditForm"
                                 PopupEditFormHeaderText="Animal"
@@ -50,6 +53,7 @@
                                 CustomizeElement="Grid_CustomizeElement">
                             <Columns>
                                 <DxGridCommandColumn NewButtonVisible="true" EditButtonVisible="true" DeleteButtonVisible="true" Width="10%" />
+                                <DxGridSelectionColumn Width="104px" />
                                 <DxGridDataColumn FieldName="Id" Caption="Id" />
                                 <DxGridDataColumn FieldName="Name" Caption="Name">
                                     <CellDisplayTemplate>
@@ -157,6 +161,134 @@
                             </EditFormTemplate>
                         </DxGrid>
                     </div>
+                </Template>
+            </DxStackLayoutItem>
+            <DxStackLayoutItem Length="auto">
+                <Template>
+                    <div class="stacklayout-header stacklayout-item">
+                        @if (SelectedDataItems?.Count() > 0)
+                        {
+                            <span class="d-block p-2 bg-primary text-white">ANIMALS SELECTED TO SELL</span>
+                            <div class="bg-success text-center w-100 text-white">
+                                <div class="row">
+                                    <div class="col">
+                                        Quantity
+                                    </div>
+                                    <div class="col">
+                                        Purchase Amount
+                                    </div>
+                                    <div class="col">
+                                        Discount @DiscountAppliedText
+                                    </div>
+                                    <div class="col">
+                                        Shipping Amount
+                                    </div>
+                                    <div class="col">
+                                        Total Amount
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col">
+                                        @(SelectedDataItems?.Count())
+                                    </div>
+                                    <div class="col">
+                                        @(PurchaseAmount.ToString("C0"))
+                                    </div>
+                                    <div class="col">
+                                        @(DiscountAmount.ToString("C0"))
+                                    </div>
+                                    <div class="col">
+                                        @(ShippingAmount.ToString("C0"))
+                                    </div>
+                                    <div class="col">
+                                        @(TotalAmount.ToString("C0"))
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </Template>
+            </DxStackLayoutItem>
+            <DxStackLayoutItem Length="auto">
+                <Template>
+                    <DxMenu ItemsPosition="ItemPosition.End">
+                        <Items>
+                            <DxMenuItem Text="Export To Excel" IconCssClass="oi oi-spreadsheet" Click="@ExportSellXlsx_Click" />
+                        </Items>
+                    </DxMenu>
+                </Template>
+            </DxStackLayoutItem>
+            <DxStackLayoutItem Length="auto">
+                <Template>
+                    @if (SelectedDataItems?.Count() > 0)
+                    {
+                        <div class="stacklayout-content stacklayout-item">
+                            <DxGrid @ref="@SellsGrid"
+                                Data="@SelectedDataItems"
+                                KeyFieldName="Id"
+                                ColumnResizeMode="GridColumnResizeMode.NextColumn"
+                                SelectAllCheckboxMode="GridSelectAllCheckboxMode.AllPages"
+                                AutoExpandAllGroupRows="true"
+                                PagerVisible="false"
+                                ShowAllRows="true"
+                                CustomizeSummaryDisplayText="Grid_CustomizeSummaryDisplayText"
+                                CustomizeElement="Grid_CustomizeElement">
+                            <Columns>
+                                <DxGridDataColumn FieldName="Id" Caption="Id" />
+                                <DxGridDataColumn FieldName="NameWithDiscount" Caption="Name">
+                                    <CellDisplayTemplate>
+                                        <div class="text-truncate">
+                                            @((context.DataItem as AnimalViewModel).NameWithDiscount)
+                                        </div>
+                                    </CellDisplayTemplate>
+                                </DxGridDataColumn>
+                                <DxGridDataColumn FieldName="BreedName" Caption="Breed" GroupIndex="0">
+                                    <CellDisplayTemplate>
+                                        <div class="text-truncate">
+                                            @((context.DataItem as AnimalViewModel).BreedName)
+                                        </div>
+                                    </CellDisplayTemplate>
+                                </DxGridDataColumn>
+                                <DxGridDataColumn FieldName="BirthDate" DisplayFormat="MMM/dd/yyyy" Caption="Birth Date">
+                                    <CellDisplayTemplate>
+                                        <div class="text-truncate">
+                                            @((context.DataItem as AnimalViewModel).BirthDateText)
+                                        </div>
+                                    </CellDisplayTemplate>
+                                </DxGridDataColumn>
+                                <DxGridDataColumn FieldName="SexName" Caption="Sex">
+                                    <CellDisplayTemplate>
+                                        <div class="text-truncate">
+                                            @((context.DataItem as AnimalViewModel).SexName)
+                                        </div>
+                                    </CellDisplayTemplate>
+                                </DxGridDataColumn>
+                                <DxGridDataColumn FieldName="Price" DisplayFormat="C0" Caption="Price">
+                                    <CellDisplayTemplate>
+                                        <div class="text-truncate">
+                                            @((context.DataItem as AnimalViewModel).Price.ToString("C0"))
+                                        </div>
+                                    </CellDisplayTemplate>
+                                </DxGridDataColumn>
+                                <DxGridDataColumn FieldName="StatusName" Caption="Status">
+                                    <CellDisplayTemplate>
+                                        <div class="text-truncate">
+                                            @((context.DataItem as AnimalViewModel).StatusName)
+                                        </div>
+                                    </CellDisplayTemplate>
+                                </DxGridDataColumn>
+                            </Columns>
+                            <GroupSummary>
+                                <DxGridSummaryItem SummaryType="GridSummaryItemType.Count" Name="AnimalCountSummary" FieldName="Id" FooterColumnName="Id" />
+                                <DxGridSummaryItem SummaryType="GridSummaryItemType.Sum" Name="AnimalPriceSummary" FieldName="Price" FooterColumnName="Price" />
+                            </GroupSummary>
+                            <TotalSummary>
+                                <DxGridSummaryItem SummaryType="GridSummaryItemType.Count" Name="AnimalCountSummary" FieldName="Id" FooterColumnName="Id" />
+                                <DxGridSummaryItem SummaryType="GridSummaryItemType.Sum" Name="AnimalPriceSummary" FieldName="Price" FooterColumnName="Price" />
+                            </TotalSummary>
+                        </DxGrid>
+                    </div>
+                    }
                 </Template>
             </DxStackLayoutItem>
         </Items>
