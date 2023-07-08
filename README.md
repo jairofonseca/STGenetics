@@ -9,4 +9,4 @@ Requirements
 
 1. Visual Studio 2022
 2. DevExpress Controls version 23.1 for Blazor components. You can download the trial version from https://www.devexpress.com
-3. Microsoft SQL Server Database. The solution uses a SQL Database 15.0.2101.7 or later. You can download the database in one of the following formats: Backup, BacPac or native files .mdf and ldf located in this repository.
+3. Microsoft SQL Server Database. The solution uses a SQL Database 15.0.2101.7 or later. You can download the database in one of the following formats: Backup, BacPac or native files .mdf and .ldf located in this repository.
