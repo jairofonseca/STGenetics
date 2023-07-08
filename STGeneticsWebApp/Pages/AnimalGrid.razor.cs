@@ -23,6 +23,43 @@ namespace STGeneticsWebApp.Pages
             StatusList = await STGeneticsService.GetStatusListAsync();
         }
 
+        async Task Grid_EditModelSaving(GridEditModelSavingEventArgs e)
+        {
+            if (e.IsNew)
+            {
+                _ = await STGeneticsService.InsertAnimal((e.EditModel as AnimalViewModel).ToAnimal());
+            }
+            else
+            {
+                await STGeneticsService.UpdateAnimal((e.EditModel as AnimalViewModel).ToAnimal());
+            }
+
+            e.Grid.ClearSelection();
+
+            this.AnimalList = await STGeneticsService.GetAnimalListAsync();
+        }
+
+        void OnEditCanceling(GridEditCancelingEventArgs e)
+        {
+            e.Grid.ClearSelection();
+        }
+
+        void Grid_CustomizeEditModel(GridCustomizeEditModelEventArgs e)
+        {
+            if (e.IsNew)
+            {
+                var newTravelItinerary = (AnimalViewModel)e.EditModel;
+
+                newTravelItinerary.BirthDate = System.DateTime.Today;
+            }
+        }
+
+        async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e)
+        {
+            await STGeneticsService.DeleteAnimal((e.DataItem as AnimalViewModel).ToAnimal());
+            this.AnimalList = await STGeneticsService.GetAnimalListAsync();
+        }
+
         void Grid_CustomizeElement(GridCustomizeElementEventArgs e)
         {
             if (e.ElementType == GridElementType.DataRow)
@@ -44,8 +81,11 @@ namespace STGeneticsWebApp.Pages
         {
             switch (e.Item.Name)
             {
-                case "ContactCountSummary":
-                    e.DisplayText = string.Format("{0:N0} Contacts", e.Value);
+                case "AnimalCountSummary":
+                    e.DisplayText = string.Format("{0:N0} Animals", e.Value);
+                    break;
+                case "AnimalPriceSummary":
+                    e.DisplayText = string.Format("{0:C0}", e.Value);
                     break;
                 default:
                     break;

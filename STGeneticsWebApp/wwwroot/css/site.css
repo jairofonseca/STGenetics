@@ -82,3 +82,20 @@ a, .btn-link {
 .stgenetics-column-chooser {
     width: auto;
 }
+
+.stgenetics-responsive-img {
+    max-width: 100%;
+    height: auto;
+}
+
+.stgenetics-container {
+    background-image: url('/images/home.png');
+    background-size: cover;
+    background-position: center;
+}
+
+@media (max-width: 768px) {
+    .stgenetics-container {
+        background-size: contain;
+    }
+}

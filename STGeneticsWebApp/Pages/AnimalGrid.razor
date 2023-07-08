@@ -1,2 +1,164 @@
 ﻿@page "/AnimalGrid"
 @using DevExpress.Blazor
+@using STGeneticsWebApp.Data;
+@if (AnimalList != null)
+{
+    <DxStackLayout CssClass="w-100" Orientation="Orientation.Vertical">
+        <Items>
+            <DxStackLayoutItem Length="auto">
+                <Template>
+                    <div class="stacklayout-header stacklayout-item">
+                        <h2>Animals</h2>
+                    </div>
+                </Template>
+            </DxStackLayoutItem>
+            <DxStackLayoutItem Length="auto">
+                <Template>
+                    <DxMenu ItemsPosition="ItemPosition.End">
+                        <Items>
+                            <DxMenuItem Text="Export To Excel" IconCssClass="oi oi-spreadsheet" Click="@ExportXlsx_Click" />
+                            <DxMenuItem Text="Column Chooser" CssClass="stgenetics-column-chooser" IconUrl="images/column-chooser.svg" Click="@OnColumnChooserClick" />
+                        </Items>
+                    </DxMenu>
+                </Template>
+            </DxStackLayoutItem>
+            <DxStackLayoutItem Length="auto">
+                <Template>
+                    <div class="stacklayout-content stacklayout-item">
+                        <DxGrid @ref="@Grid"
+                                Data="@AnimalList"
+                                KeyFieldName="Code"
+                                ShowSearchBox="true"
+                                ShowGroupPanel="true"
+                                ShowFilterRow="true"
+                                ColumnResizeMode="GridColumnResizeMode.NextColumn"
+                                FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always"
+                                EditMode="GridEditMode.PopupEditForm"
+                                PopupEditFormCssClass="PopupEditForm"
+                                PopupEditFormHeaderText="Animal"
+                                PagerVisible="true"
+                                PageSize="10"
+                                PagerNavigationMode="PagerNavigationMode.Auto"
+                                PagerPosition="GridPagerPosition.TopAndBottom"
+                                PageSizeSelectorVisible="true"
+                                PageSizeSelectorItems=@(new int[] { 20, 50, 100, 150 })
+                                CustomizeEditModel="Grid_CustomizeEditModel"
+                                EditCanceling="@OnEditCanceling"
+                                EditModelSaving="Grid_EditModelSaving"
+                                DataItemDeleting="Grid_DataItemDeleting"
+                                CustomizeSummaryDisplayText="Grid_CustomizeSummaryDisplayText"
+                                CustomizeElement="Grid_CustomizeElement">
+                            <Columns>
+                                <DxGridCommandColumn NewButtonVisible="true" EditButtonVisible="true" DeleteButtonVisible="true" Width="10%" />
+                                <DxGridDataColumn FieldName="Id" Caption="Id" />
+                                <DxGridDataColumn FieldName="Name" Caption="Name">
+                                    <CellDisplayTemplate>
+                                        <div class="text-truncate">
+                                            @((context.DataItem as AnimalViewModel).Name)
+                                        </div>
+                                    </CellDisplayTemplate>
+                                </DxGridDataColumn>
+                                <DxGridDataColumn FieldName="BreedName" Caption="Breed">
+                                    <CellDisplayTemplate>
+                                        <div class="text-truncate">
+                                            @((context.DataItem as AnimalViewModel).BreedName)
+                                        </div>
+                                    </CellDisplayTemplate>
+                                </DxGridDataColumn>
+                                <DxGridDataColumn FieldName="BirthDate" DisplayFormat="MMM/dd/yyyy" Caption="Birth Date">
+                                    <CellDisplayTemplate>
+                                        <div class="text-truncate">
+                                            @((context.DataItem as AnimalViewModel).BirthDateText)
+                                        </div>
+                                    </CellDisplayTemplate>
+                                </DxGridDataColumn>
+                                <DxGridDataColumn FieldName="SexName" Caption="Sex">
+                                    <CellDisplayTemplate>
+                                        <div class="text-truncate">
+                                            @((context.DataItem as AnimalViewModel).SexName)
+                                        </div>
+                                    </CellDisplayTemplate>
+                                </DxGridDataColumn>
+                                <DxGridDataColumn FieldName="Price" DisplayFormat="C0" Caption="Price">
+                                    <CellDisplayTemplate>
+                                        <div class="text-truncate">
+                                            @((context.DataItem as AnimalViewModel).Price.ToString("C0"))
+                                        </div>
+                                    </CellDisplayTemplate>
+                                </DxGridDataColumn>
+                                <DxGridDataColumn FieldName="StatusName" Caption="Status">
+                                    <CellDisplayTemplate>
+                                        <div class="text-truncate">
+                                            @((context.DataItem as AnimalViewModel).StatusName)
+                                        </div>
+                                    </CellDisplayTemplate>
+                                </DxGridDataColumn>
+                            </Columns>
+                            <GroupSummary>
+                                <DxGridSummaryItem SummaryType="GridSummaryItemType.Count" Name="AnimalCountSummary" FieldName="Id" FooterColumnName="Id" />
+                                <DxGridSummaryItem SummaryType="GridSummaryItemType.Sum" Name="AnimalPriceSummary" FieldName="Price" FooterColumnName="Price" />
+                            </GroupSummary>
+                            <TotalSummary>
+                                <DxGridSummaryItem SummaryType="GridSummaryItemType.Count" Name="AnimalCountSummary" FieldName="Id" FooterColumnName="Id" />
+                                <DxGridSummaryItem SummaryType="GridSummaryItemType.Sum" Name="AnimalPriceSummary" FieldName="Price" FooterColumnName="Price" />
+                            </TotalSummary>
+                            <EditFormTemplate Context="EditFormContext">
+                                @{
+                                    var currentAnimal = (AnimalViewModel)EditFormContext.EditModel;
+                                }
+                                <DxFormLayout CssClass="w-100">
+                                    <DxFormLayoutItem Context="animalContext" Caption="Name" ColSpanMd="12">
+                                        <DxTextBox @bind-Text="@currentAnimal.Name" ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" maxlength="100" />
+                                        <ValidationMessage For="@(() => currentAnimal.Name)" />
+                                    </DxFormLayoutItem>
+                                    <DxFormLayoutItem Context="animalContext" Caption="Breed" ColSpanMd="12">
+                                        <DxComboBox Data="@this.BreedList"
+                                                    NullText="Select the Breed..."
+                                                    FilteringMode="DataGridFilteringMode.Contains"
+                                                    TextFieldName="@nameof(Breed.Name)"
+                                                    ValueFieldName="@nameof(Breed.Id)"
+                                        @bind-Value="@currentAnimal.BreedId" />
+                                        <ValidationMessage For="@(() => currentAnimal.BreedId)" />
+                                    </DxFormLayoutItem>
+                                    <DxFormLayoutItem Context="animalContext" Caption="Birth Date" ColSpanMd="12">
+                                        <DxDateEdit @bind-Date="@currentAnimal.BirthDate"
+                                                    DisplayFormat="MMM/dd/yyyy"
+                                                    ScrollPickerFormat="MMM/dd/yyyy"
+                                                    Format="MMM/dd/yyyy"
+                                                    TimeSectionVisible="false"
+                                                    ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                                    NullText="Select the Birth Date" />
+                                        <ValidationMessage For="@(() => currentAnimal.BirthDate)" />
+                                    </DxFormLayoutItem>
+
+                                    <DxFormLayoutItem Context="animalContext" Caption="Sex" ColSpanMd="4">
+                                        <DxComboBox Data="@this.SexList"
+                                                    NullText="Select the Sex..."
+                                                    FilteringMode="DataGridFilteringMode.Contains"
+                                                    TextFieldName="@nameof(Sex.Name)"
+                                                    ValueFieldName="@nameof(Sex.Id)"
+                                        @bind-Value="@currentAnimal.SexId" />
+                                        <ValidationMessage For="@(() => currentAnimal.SexId)" />
+                                    </DxFormLayoutItem>
+                                    <DxFormLayoutItem Context="animalContext" Caption="Price" ColSpanMd="4">
+                                        <DxMaskedInput MaskMode="MaskMode.Numeric" DisplayFormat="C0" @bind-Value="@currentAnimal.Price" />
+                                        <ValidationMessage For="@(() => currentAnimal.Price)" />
+                                    </DxFormLayoutItem>
+                                    <DxFormLayoutItem Context="animalContext" Caption="Status" ColSpanMd="4">
+                                        <DxComboBox Data="@StatusList"
+                                                    NullText="Select the Status..."
+                                                    FilteringMode="DataGridFilteringMode.Contains"
+                                                    TextFieldName="@nameof(Status.Name)"
+                                                    ValueFieldName="@nameof(Status.Id)"
+                                        @bind-Value="@currentAnimal.StatusId" />
+                                        <ValidationMessage For="@(() => currentAnimal.StatusId)" />
+                                    </DxFormLayoutItem>
+                                </DxFormLayout>
+                            </EditFormTemplate>
+                        </DxGrid>
+                    </div>
+                </Template>
+            </DxStackLayoutItem>
+        </Items>
+    </DxStackLayout>
+}

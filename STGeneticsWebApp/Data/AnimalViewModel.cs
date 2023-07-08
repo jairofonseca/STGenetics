@@ -7,7 +7,7 @@
         public short BreedId { get; set; }
         public string BreedName { get; set; }
         public DateTime BirthDate { get; set; }
-        public string BirtdDateText { get { return (BirthDate.ToString("MMM/dd/yyyy")); } }
+        public string BirthDateText { get { return (BirthDate.ToString("MMM/dd/yyyy")); } }
         public byte SexId { get; set; }
         public string SexName { get; set; }
         public decimal Price { get; set; }
