@@ -1,7 +1,7 @@
 # STGenetics
 ST Genetics
 
-ST Genetics Web App it's a Blazor solution to sell bulls and cows from our farms.
+ST Genetics Web App it's a Blazor solution using .Net 6 to sell bulls and cows from our farms.
 
 ![image](https://github.com/jairofonseca/STGenetics/assets/15929269/98e670b8-605c-4096-9dec-14b16807a28e)
 
